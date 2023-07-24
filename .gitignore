@@ -27,3 +27,5 @@ coverage.xml
 test_localsystem.txt
 
 # ----------------------------------------------------------------------
+.pylintrc
+/.github/workflows/*.jinja2Compiler.ConditionalInvocationQueryMixin.data
