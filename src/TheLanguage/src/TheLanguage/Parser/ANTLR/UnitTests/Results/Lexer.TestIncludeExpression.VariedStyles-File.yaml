@@ -1,0 +1,197 @@
+__class__: RootExpression
+expression_type__: Unknown
+region__: C:/Workspace1/File, line 1, column 1 -> line 1, column 18
+is_disabled__: false
+children:
+- __class__: ParseIncludeExpression
+  expression_type__: Unknown
+  region__: C:/Workspace1/File, line 1, column 1 -> line 1, column 18
+  is_disabled__: false
+  filename:
+    __class__: LeafExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 1, column 15 -> line 1, column 18
+    is_disabled__: false
+    value: C:/Workspace1/Foo.TheLanguage
+  context:
+    __class__: ParseIncludeFileExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 1, column 15 -> line 1, column 18
+    is_disabled__: false
+    value: Foo
+- __class__: ParseIncludeExpression
+  expression_type__: Unknown
+  region__: C:/Workspace1/File, line 1, column 1 -> line 1, column 23
+  is_disabled__: false
+  filename:
+    __class__: LeafExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 1, column 20 -> line 1, column 23
+    is_disabled__: false
+    value: C:/Workspace1/Bar.TheLanguage
+  context:
+    __class__: ParseIncludeFileExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 1, column 20 -> line 1, column 23
+    is_disabled__: false
+    value: Bar
+- __class__: ParseIncludeExpression
+  expression_type__: Unknown
+  region__: C:/Workspace1/File, line 2, column 1 -> line 2, column 18
+  is_disabled__: false
+  filename:
+    __class__: LeafExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 2, column 15 -> line 2, column 18
+    is_disabled__: false
+    value: C:/Workspace1/Foo.TheLanguage
+  context:
+    __class__: ParseIncludeFileExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 2, column 15 -> line 2, column 18
+    is_disabled__: false
+    value: Foo
+- __class__: ParseIncludeExpression
+  expression_type__: Unknown
+  region__: C:/Workspace1/File, line 2, column 1 -> line 2, column 23
+  is_disabled__: false
+  filename:
+    __class__: LeafExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 2, column 20 -> line 2, column 23
+    is_disabled__: false
+    value: C:/Workspace1/Bar.TheLanguage
+  context:
+    __class__: ParseIncludeFileExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 2, column 20 -> line 2, column 23
+    is_disabled__: false
+    value: Bar
+- __class__: ParseIncludeExpression
+  expression_type__: Unknown
+  region__: C:/Workspace1/File, line 3, column 1 -> line 3, column 23
+  is_disabled__: false
+  filename:
+    __class__: LeafExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 3, column 15 -> line 3, column 18
+    is_disabled__: false
+    value: C:/Workspace1/Foo.TheLanguage
+  context:
+    __class__: ParseIncludeFileExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 3, column 22 -> line 3, column 23
+    is_disabled__: false
+    value: f
+- __class__: ParseIncludeExpression
+  expression_type__: Unknown
+  region__: C:/Workspace1/File, line 3, column 1 -> line 3, column 33
+  is_disabled__: false
+  filename:
+    __class__: LeafExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 3, column 25 -> line 3, column 28
+    is_disabled__: false
+    value: C:/Workspace1/Bar.TheLanguage
+  context:
+    __class__: ParseIncludeFileExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 3, column 32 -> line 3, column 33
+    is_disabled__: false
+    value: b
+- __class__: ParseIncludeExpression
+  expression_type__: Unknown
+  region__: C:/Workspace1/File, line 5, column 1 -> line 5, column 19
+  is_disabled__: false
+  filename:
+    __class__: LeafExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 5, column 16 -> line 5, column 19
+    is_disabled__: false
+    value: C:/Workspace1/Foo.TheLanguage
+  context:
+    __class__: ParseIncludeFileExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 5, column 16 -> line 5, column 19
+    is_disabled__: false
+    value: Foo
+- __class__: ParseIncludeExpression
+  expression_type__: Unknown
+  region__: C:/Workspace1/File, line 6, column 1 -> line 6, column 19
+  is_disabled__: false
+  filename:
+    __class__: LeafExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 6, column 16 -> line 6, column 19
+    is_disabled__: false
+    value: C:/Workspace1/Foo.TheLanguage
+  context:
+    __class__: ParseIncludeFileExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 6, column 16 -> line 6, column 19
+    is_disabled__: false
+    value: Foo
+- __class__: ParseIncludeExpression
+  expression_type__: Unknown
+  region__: C:/Workspace1/File, line 8, column 1 -> line 9, column 8
+  is_disabled__: false
+  filename:
+    __class__: LeafExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 9, column 5 -> line 9, column 8
+    is_disabled__: false
+    value: C:/Workspace1/Foo.TheLanguage
+  context:
+    __class__: ParseIncludeFileExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 9, column 5 -> line 9, column 8
+    is_disabled__: false
+    value: Foo
+- __class__: ParseIncludeExpression
+  expression_type__: Unknown
+  region__: C:/Workspace1/File, line 11, column 1 -> line 12, column 13
+  is_disabled__: false
+  filename:
+    __class__: LeafExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 12, column 5 -> line 12, column 8
+    is_disabled__: false
+    value: C:/Workspace1/Foo.TheLanguage
+  context:
+    __class__: ParseIncludeFileExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 12, column 12 -> line 12, column 13
+    is_disabled__: false
+    value: F
+- __class__: ParseIncludeExpression
+  expression_type__: Unknown
+  region__: C:/Workspace1/File, line 11, column 1 -> line 13, column 14
+  is_disabled__: false
+  filename:
+    __class__: LeafExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 13, column 5 -> line 13, column 8
+    is_disabled__: false
+    value: C:/Workspace1/Bar.TheLanguage
+  context:
+    __class__: ParseIncludeFileExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 13, column 12 -> line 13, column 14
+    is_disabled__: false
+    value: B1
+- __class__: ParseIncludeExpression
+  expression_type__: Unknown
+  region__: C:/Workspace1/File, line 11, column 1 -> line 14, column 14
+  is_disabled__: false
+  filename:
+    __class__: LeafExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 14, column 5 -> line 14, column 8
+    is_disabled__: false
+    value: C:/Workspace1/Baz.TheLanguage
+  context:
+    __class__: ParseIncludeFileExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/File, line 14, column 12 -> line 14, column 14
+    is_disabled__: false
+    value: B2

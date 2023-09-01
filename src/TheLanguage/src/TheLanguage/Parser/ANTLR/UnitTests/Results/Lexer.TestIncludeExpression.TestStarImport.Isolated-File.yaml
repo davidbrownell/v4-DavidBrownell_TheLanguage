@@ -1,0 +1,21 @@
+__class__: RootExpression
+expression_type__: Unknown
+region__: C:/Workspace1/Path1/File, line 1, column 1 -> line 2, column 1
+is_disabled__: false
+children:
+- __class__: ParseIncludeExpression
+  expression_type__: Unknown
+  region__: C:/Workspace1/Path1/File, line 1, column 1 -> line 2, column 1
+  is_disabled__: false
+  filename:
+    __class__: LeafExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/Path1/File, line 1, column 1 -> line 2, column 1
+    is_disabled__: false
+    value: C:/Workspace1/Path1/FileB.TheLanguage
+  context:
+    __class__: ParseIncludeFileExpression
+    expression_type__: Unknown
+    region__: C:/Workspace1/Path1/File, line 1, column 8 -> line 1, column 9
+    is_disabled__: false
+    value: FileB

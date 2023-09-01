@@ -1,0 +1,5 @@
+__class__: RootExpression
+expression_type__: Unknown
+region__: C:/Workspace1/Bar.TheLanguage, line 1, column 1 -> line 1, column 1
+is_disabled__: false
+children: []
