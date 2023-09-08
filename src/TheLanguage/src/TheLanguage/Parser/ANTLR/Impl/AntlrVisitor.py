@@ -26,13 +26,13 @@ from Common_Foundation.ContextlibEx import ExitStack
 from Common_Foundation import PathEx
 from Common_Foundation.Types import overridemethod
 
-from TheLanguage.Parser.ANTLR.AntlrVisitorMixin import AntlrVisitorMixin
+from TheLanguage.Parser.ANTLR.Impl.AntlrVisitorMixin import AntlrVisitorMixin
 from TheLanguage.Parser.Expressions.Expression import ExpressionType
-from TheLanguage.Parser.Expressions.IdentifierExpression import IdentifierExpression, IdentifierType
+from TheLanguage.Parser.Expressions.IdentifierExpression import IdentifierExpression
 from TheLanguage.Parser.Expressions.LeafExpression import LeafExpression
 
 # ----------------------------------------------------------------------
-sys.path.insert(0, str(PathEx.EnsureDir(Path(__file__).parent / "GeneratedCode")))
+sys.path.insert(0, str(PathEx.EnsureDir(Path(__file__).parent.parent / "GeneratedCode")))
 with ExitStack(lambda: sys.path.pop(0)):
     from TheLanguageGrammarParser import TheLanguageGrammarParser           # type: ignore # pylint: disable=import-error
     from TheLanguageGrammarVisitor import TheLanguageGrammarVisitor         # type: ignore # pylint: disable=import-error
@@ -47,10 +47,9 @@ class AntlrVisitor(TheLanguageGrammarVisitor):
     def visitIdentifier(self, ctx:TheLanguageGrammarParser.IdentifierContext):
         self._stack.append(
             IdentifierExpression.Create(
-                ExpressionType.Unknown, # BugBug
+                ExpressionType.Unknown,
                 self.CreateRegion(ctx),
                 ctx.IDENTIFIER().symbol.text,
-                IdentifierType.Unknown,
             ),
         )
 
@@ -82,8 +81,6 @@ class AntlrVisitor(TheLanguageGrammarVisitor):
             include_items,
         )
 
-        BugBug = 10
-
     # ----------------------------------------------------------------------
     @overridemethod
     def visitInclude_expression_source(self, ctx:TheLanguageGrammarParser.Include_expression_sourceContext):
@@ -103,7 +100,7 @@ class AntlrVisitor(TheLanguageGrammarVisitor):
                 is_relative = True
 
             elif isinstance(child, IdentifierExpression):
-                child.Validate(IdentifierType.File)
+                AntlrVisitorMixin.ValidateAsFileOrDirectory(child)
                 path_components.append(child.value)
 
             else:
@@ -144,7 +141,11 @@ class AntlrVisitor(TheLanguageGrammarVisitor):
     @overridemethod
     def visitInclude_expression_star(self, ctx:TheLanguageGrammarParser.Include_expression_starContext):
         self._stack.append(
-            LeafExpression[str](ExpressionType.Unknown, self.CreateRegion(ctx), "*"), # BugBug: Use of Unknown Expression type
+            LeafExpression[str](
+                ExpressionType.Unknown, # BugBug: Use of Unknown Expression type
+                self.CreateRegion(ctx),
+                "*",
+            ),
         )
 
     # ----------------------------------------------------------------------

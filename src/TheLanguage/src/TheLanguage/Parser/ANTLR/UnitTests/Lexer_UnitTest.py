@@ -61,8 +61,6 @@ with ExitStack(lambda: sys.path.pop(0)):
 # TODO:             },
 # TODO:         },
 # TODO:     )
-# TODO:
-# TODO:     BugBug = 10
 
 
 # ----------------------------------------------------------------------
@@ -645,7 +643,7 @@ class TestIncludeExpression(object):
                 """\
                 from . import Foo, Bar
                 from . import Foo, Bar,
-                from . import Foo as f, Bar as b,
+                from . import Foo as F, Bar as B,
 
                 from . import (Foo)
                 from . import (Foo, )

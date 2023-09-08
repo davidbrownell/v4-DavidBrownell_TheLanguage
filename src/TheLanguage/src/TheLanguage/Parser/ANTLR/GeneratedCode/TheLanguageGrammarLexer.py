@@ -1,4 +1,4 @@
-# Generated from C:\Code\GitHub\davidbrownell\DavidBrownell\TheLanguage\src\TheLanguage\src\TheLanguage\Parser\ANTLR\TheLanguageGrammar.g4 by ANTLR 4.13.0
+# Generated from C:\Code\GitHub\davidbrownell\DavidBrownell\TheLanguage\src\TheLanguage\src\TheLanguage\Parser\ANTLR\Grammar\TheLanguageGrammar.g4 by ANTLR 4.13.0
 from antlr4 import *
 from io import StringIO
 import sys

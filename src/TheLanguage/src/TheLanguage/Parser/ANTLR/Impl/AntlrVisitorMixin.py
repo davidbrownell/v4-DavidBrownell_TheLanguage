@@ -27,8 +27,9 @@ import antlr4
 from Common_Foundation.ContextlibEx import ExitStack
 from Common_Foundation import PathEx
 
-from TheLanguage.AllErrors import *
+from TheLanguage import AllErrors
 
+from TheLanguage.Common.Errors import TheLanguageException
 from TheLanguage.Common.Range import Location, Range
 from TheLanguage.Common.Region import Location, Region
 
@@ -40,7 +41,7 @@ from TheLanguage.Parser.Expressions.RootExpression import RootExpression
 from TheLanguage.Parser.Impl.ParseIncludeExpression import ParseIncludeExpression
 
 # ----------------------------------------------------------------------
-sys.path.insert(0, str(PathEx.EnsureDir(Path(__file__).parent / "GeneratedCode")))
+sys.path.insert(0, str(PathEx.EnsureDir(Path(__file__).parent.parent / "GeneratedCode")))
 with ExitStack(lambda: sys.path.pop(0)):
     from TheLanguageGrammarParser import TheLanguageGrammarParser           # type: ignore # pylint: disable=import-error
     from TheLanguageGrammarVisitor import TheLanguageGrammarVisitor         # type: ignore # pylint: disable=import-error
@@ -167,6 +168,190 @@ class AntlrVisitorMixin(object):
             Location(stop_line, stop_col + 1),
             self.filename,
         )
+
+    # ----------------------------------------------------------------------
+    # BugBug: Revisit use of '!' in all IsValid___ functions
+
+    @staticmethod
+    def IsValidClass(
+        identifier: IdentifierExpression,
+    ) -> bool:
+        value = identifier.value
+
+        if value.endswith("_"):
+            return False
+
+        if value.endswith("?") or value.endswith("!"):
+            return False
+
+        if 'a' <= value.lstrip("_")[0] <= 'z':
+            return False
+
+        return True
+
+    # ----------------------------------------------------------------------
+    @staticmethod
+    def IsValidFileOrDirectory(
+        identifier: IdentifierExpression,
+    ) -> bool:
+        value = identifier.value
+
+        if value.startswith("_") or value.endswith("_"):
+            return False
+
+        if value.endswith("?") or value.endswith("!"):
+            return False
+
+        if 'a' <= value[0] <= 'z':
+            return False
+
+        return True
+
+    # ----------------------------------------------------------------------
+    @classmethod
+    def IsValidComponent(
+        cls,
+        identifier: IdentifierExpression,
+    ) -> bool:
+        return (
+            cls.IsValidClass(identifier)
+            or cls.IsValidFunction(identifier)
+            or cls.IsValidType(identifier)
+        )
+
+    # ----------------------------------------------------------------------
+    @staticmethod
+    def IsValidFunction(
+        identifier: IdentifierExpression,
+    ) -> bool:
+        value = identifier.value
+
+        if value.startswith("__") and not value.endswith("__"):
+            return False
+
+        if 'a' <= value.lstrip("_")[0] <= 'z':
+            return False
+
+        return True
+
+    # ----------------------------------------------------------------------
+    @staticmethod
+    def IsValidTemplate(
+        identifier: IdentifierExpression,
+    ) -> bool:
+        value = identifier.value
+
+        if value.startswith("_") or value.endswith("_"):
+            return False
+
+        if value.endswith("?") or value.endswith("!"):
+            return False
+
+        if 'a' <= value[0] <= 'z':
+            return False
+
+        if value[-1] != 'T':
+            return False
+
+        return True
+
+    # ----------------------------------------------------------------------
+    @staticmethod
+    def IsValidType(
+        identifier: IdentifierExpression,
+    ) -> bool:
+        return True # BugBug
+
+    # ----------------------------------------------------------------------
+    @staticmethod
+    def IsValidVariable(
+        identifier: IdentifierExpression,
+    ) -> bool:
+        return True # BugBug
+
+    # ----------------------------------------------------------------------
+    @classmethod
+    def ValidateAsClass(
+        cls,
+        identifier: IdentifierExpression,
+    ) -> None:
+        if not cls.IsValidClass(identifier):
+            raise AllErrors.InvalidClassIdentifier.CreateAsException(
+                identifier.region__,
+                identifier.value,
+            )
+
+    # ----------------------------------------------------------------------
+    @classmethod
+    def ValidateAsComponent(
+        cls,
+        identifier: IdentifierExpression,
+    ) -> None:
+        if not cls.IsValidComponent(identifier):
+            raise AllErrors.InvalidComponentIdentifier.CreateAsException(
+                identifier.region__,
+                identifier.value,
+            )
+
+    # ----------------------------------------------------------------------
+    @classmethod
+    def ValidateAsFileOrDirectory(
+        cls,
+        identifier: IdentifierExpression,
+    ) -> None:
+        if not cls.IsValidFileOrDirectory(identifier):
+            raise AllErrors.InvalidFileOrDirectoryIdentifier.CreateAsException(
+                identifier.region__,
+                identifier.value,
+            )
+
+    # ----------------------------------------------------------------------
+    @classmethod
+    def ValidateAsFunction(
+        cls,
+        identifier: IdentifierExpression,
+    ) -> None:
+        if not cls.IsValidFunction(identifier):
+            raise AllErrors.InvalidFunctionIdentifier.CreateAsException(
+                identifier.region__,
+                identifier.value,
+            )
+
+    # ----------------------------------------------------------------------
+    @classmethod
+    def ValidateAsTemplate(
+        cls,
+        identifier: IdentifierExpression,
+    ) -> None:
+        if not cls.IsValidTemplate(identifier):
+            raise AllErrors.InvalidTemplateIdentifier.CreateAsException(
+                identifier.region__,
+                identifier.value,
+            )
+
+    # ----------------------------------------------------------------------
+    @classmethod
+    def ValidateAsType(
+        cls,
+        identifier: IdentifierExpression,
+    ) -> None:
+        if not cls.IsValidType(identifier):
+            raise AllErrors.InvalidTypeIdentifier.CreateAsException(
+                identifier.region__,
+                identifier.value,
+            )
+
+    # ----------------------------------------------------------------------
+    @classmethod
+    def ValidateAsVariable(
+        cls,
+        identifier: IdentifierExpression,
+    ) -> None:
+        if not cls.IsValidVariable(identifier):
+            raise AllErrors.InvalidVariableIdentifier.CreateAsException(
+                identifier.region__,
+                identifier.value,
+            )
 
     # ----------------------------------------------------------------------
     # |

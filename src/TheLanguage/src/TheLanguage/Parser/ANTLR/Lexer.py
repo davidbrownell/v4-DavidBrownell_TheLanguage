@@ -15,13 +15,12 @@
 # ----------------------------------------------------------------------
 """Functionality to Lex TheLanguage content"""
 
-import itertools
 import sys
 import threading
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, cast, Optional
+from typing import Callable, cast, Optional
 
 import antlr4
 
@@ -38,11 +37,11 @@ from TheLanguage.Common.Errors import Error, ExceptionError, TheLanguageExceptio
 from TheLanguage.Common.Location import Location
 from TheLanguage.Common.Region import Region
 
-from TheLanguage.Parser.ANTLR.AntlrVisitor import AntlrVisitor
-from TheLanguage.Parser.ANTLR.AntlrVisitorMixin import AntlrVisitorMixin
+from TheLanguage.Parser.ANTLR.Impl.AntlrVisitor import AntlrVisitor
+from TheLanguage.Parser.ANTLR.Impl.AntlrVisitorMixin import AntlrVisitorMixin
 
 from TheLanguage.Parser.Expressions.Expression import ExpressionType
-from TheLanguage.Parser.Expressions.IdentifierExpression import IdentifierType
+from TheLanguage.Parser.Expressions.IdentifierExpression import IdentifierExpression
 from TheLanguage.Parser.Expressions.LeafExpression import LeafExpression
 from TheLanguage.Parser.Expressions.RootExpression import RootExpression
 
@@ -126,6 +125,55 @@ def Lex(
         single_threaded=single_threaded,
         raise_if_single_error=raise_if_single_error,
     )
+
+
+# ----------------------------------------------------------------------
+def ValidateAsClass(
+    identifier: IdentifierExpression,
+) -> None:
+    AntlrVisitorMixin.ValidateAsClass(identifier)
+
+
+# ----------------------------------------------------------------------
+def ValidateAsComponent(
+    identifier: IdentifierExpression,
+) -> None:
+    AntlrVisitorMixin.ValidateAsComponent(identifier)
+
+
+# ----------------------------------------------------------------------`
+def ValidateAsFileOrDirectory(
+    identifier: IdentifierExpression,
+) -> None:
+    AntlrVisitorMixin.ValidateAsFileOrDirectory(identifier)
+
+
+# ----------------------------------------------------------------------
+def ValidateAsFunction(
+    identifier: IdentifierExpression,
+) -> None:
+    AntlrVisitorMixin.ValidateAsFunction(identifier)
+
+
+# ----------------------------------------------------------------------
+def ValidateAsTemplate(
+    identifier: IdentifierExpression,
+) -> None:
+    AntlrVisitorMixin.ValidateAsTemplate(identifier)
+
+
+# ----------------------------------------------------------------------
+def ValidateAsType(
+    identifier: IdentifierExpression,
+) -> None:
+    AntlrVisitorMixin.ValidateAsType(identifier)
+
+
+# ----------------------------------------------------------------------
+def ValidateAsVariable(
+    identifier: IdentifierExpression,
+) -> None:
+    AntlrVisitorMixin.ValidateAsVariable(identifier)
 
 
 # ----------------------------------------------------------------------
@@ -469,8 +517,8 @@ class _LexerImpl(object):
             if fullpath.is_dir():
                 # Import files
                 for include_item in include_items:
-                    include_item.element_name.Validate(IdentifierType.File)
-                    include_item.reference_name.Validate(IdentifierType.File)
+                    ValidateAsFileOrDirectory(include_item.element_name)
+                    ValidateAsFileOrDirectory(include_item.reference_name)
 
                     potential_fullpath = self._ResolveSource(
                         fullpath / include_item.element_name.value,
@@ -512,8 +560,8 @@ class _LexerImpl(object):
                 components: list[ParseIncludeComponentExpression] = []
 
                 for include_item in include_items:
-                    include_item.element_name.Validate(IdentifierType.Component)
-                    include_item.reference_name.Validate(IdentifierType.Component)
+                    ValidateAsComponent(include_item.element_name)
+                    ValidateAsComponent(include_item.reference_name)
 
                     components.append(
                         ParseIncludeComponentExpression.Create(
@@ -632,12 +680,17 @@ class _LexerImpl(object):
                     # Initialize instance variables that we have explicitly added within the
                     # ANTLR grammar file.
                     lexer.CustomInit()
+
+                    lexer.removeErrorListeners()
                     lexer.addErrorListener(error_listener)
 
                     tokens = antlr4.CommonTokenStream(lexer)
+
                     tokens.fill()
 
                     parser = TheLanguageGrammarParser(tokens)
+
+                    parser.removeErrorListeners()
                     parser.addErrorListener(error_listener)
 
                     ast = parser.entry_point__()
