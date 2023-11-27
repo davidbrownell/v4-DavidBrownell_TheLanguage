@@ -1,9 +1,9 @@
 # ----------------------------------------------------------------------
 # |
-# |  ParseParseIncludeExpression.py
+# |  ParseIncludeExpression.py
 # |
 # |  David Brownell <db@DavidBrownell.com>
-# |      2023-08-07 16:12:05
+# |      2023-11-26 14:48:53
 # |
 # ----------------------------------------------------------------------
 # |
@@ -22,34 +22,25 @@ from typing import cast, ClassVar
 from Common_Foundation.Types import overridemethod
 
 from TheLanguage.Parser.Expressions.Expression import Expression, ExpressionType
-from TheLanguage.Parser.Expressions.LeafExpression import LeafExpression
+from TheLanguage.Parser.Expressions.TerminalExpression import TerminalExpression
 
 
 # ----------------------------------------------------------------------
 @dataclass
-class ParseIncludeFileExpression(LeafExpression[str]):
-    """Contextual information associated with an include expression where the include content is a file"""
+class ParseIncludeImportItemExpression(Expression):
+    """Item included as a part of an include expression"""
 
     # ----------------------------------------------------------------------
-    expression_type__: ClassVar[ExpressionType]         = ExpressionType.Unknown # BugBug
+    expression_type__: ClassVar[ExpressionType]         = ExpressionType.Include
 
-
-# ----------------------------------------------------------------------
-@dataclass
-class ParseIncludeComponentExpression(Expression):
-    """Specific component within a file processed as a part of an include statement"""
-
-    # ----------------------------------------------------------------------
-    expression_type__: ClassVar[ExpressionType]         = ExpressionType.Unknown # BugBug
-
-    name: LeafExpression[str]
-    reference_name: LeafExpression[str]
+    name: TerminalExpression[str]
+    reference_name: TerminalExpression[str]
 
     # ----------------------------------------------------------------------
     # ----------------------------------------------------------------------
     # ----------------------------------------------------------------------
     @overridemethod
-    def _GenerateAcceptDetails(self) -> Expression._GenerateAcceptDetailsResultType:
+    def _GenerateAcceptDetails(self) -> Expression._GenerateAcceptDetailsResultType:  # pragma: no cover
         yield "name", self.name
         yield "reference_name", self.reference_name
 
@@ -60,10 +51,10 @@ class ParseIncludeExpression(Expression):
     """Includes content from another translation unit"""
 
     # ----------------------------------------------------------------------
-    expression_type__: ClassVar[ExpressionType]         = ExpressionType.Unknown # BugBug
+    expression_type__: ClassVar[ExpressionType]         = ExpressionType.Include
 
-    filename: LeafExpression[Path]
-    context: ParseIncludeFileExpression | list[ParseIncludeComponentExpression]
+    filename: TerminalExpression[Path]
+    items: list[ParseIncludeImportItemExpression]
 
     # ----------------------------------------------------------------------
     # ----------------------------------------------------------------------
@@ -71,4 +62,4 @@ class ParseIncludeExpression(Expression):
     @overridemethod
     def _GenerateAcceptDetails(self) -> Expression._GenerateAcceptDetailsResultType:  # pragma: no cover
         yield "filename", self.filename
-        yield "context", self.context  # type: ignore
+        yield "items", cast(list[Expression], self.items)

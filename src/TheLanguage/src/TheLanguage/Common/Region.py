@@ -3,7 +3,7 @@
 # |  Region.py
 # |
 # |  David Brownell <db@DavidBrownell.com>
-# |      2023-07-26 11:49:01
+# |      2023-11-24 10:52:24
 # |
 # ----------------------------------------------------------------------
 # |
@@ -22,13 +22,14 @@ from functools import cached_property
 from pathlib import Path
 from typing import Union
 
-from .Range import Location, Range
+from TheLanguage.Common.Location import Location
+from TheLanguage.Common.Range import Range
 
 
 # ----------------------------------------------------------------------
 @dataclass(frozen=True)
 class Region(Range):
-    """Range within a source file"""
+    """Range that includes source file information"""
 
     # ----------------------------------------------------------------------
     filename: Path
@@ -43,7 +44,7 @@ class Region(Range):
         end_line: int,
         end_column: int,
     ) -> "Region":
-        return cls.CreateFromLocations(
+        return cls.CreateFromLocation(
             filename,
             Location(begin_line, begin_column),
             Location(end_line, end_column),
@@ -51,13 +52,13 @@ class Region(Range):
 
     # ----------------------------------------------------------------------
     @classmethod
-    def CreateFromLocations(
+    def CreateFromLocation(
         cls,
         filename: Path,
-        begin_location: Location,
-        end_location: Location,
+        begin: Location,
+        end: Location,
     ) -> "Region":
-        return cls(begin_location, end_location, filename)
+        return cls(begin, end, filename)
 
     # ----------------------------------------------------------------------
     @classmethod
@@ -76,28 +77,23 @@ class Region(Range):
         return self._string
 
     # ----------------------------------------------------------------------
-    @classmethod
+    @staticmethod
     def Compare(
-        cls,
-        this: "Region",
-        that: "Region",
+        this: "Region", # type: ignore
+        that: "Region", # type: ignore
     ) -> int:
         if this.filename != that.filename:
             return -1 if this.filename < that.filename else 1
 
-        result = super(Region, cls).Compare(this, that)
-        if result != 0:
-            return result
-
-        return 0
+        return Range.Compare(this, that)
 
     # ----------------------------------------------------------------------
-    def __eq__(self, other): return self.__class__.Compare(self, other) == 0    # pylint: disable=multiple-statements
-    def __ne__(self, other): return self.__class__.Compare(self, other) != 0    # pylint: disable=multiple-statements
-    def __lt__(self, other): return self.__class__.Compare(self, other) < 0     # pylint: disable=multiple-statements
-    def __le__(self, other): return self.__class__.Compare(self, other) <= 0    # pylint: disable=multiple-statements
-    def __gt__(self, other): return self.__class__.Compare(self, other) > 0     # pylint: disable=multiple-statements
-    def __ge__(self, other): return self.__class__.Compare(self, other) >= 0    # pylint: disable=multiple-statements
+    def __eq__(self, other) -> bool: return isinstance(other, Region) and self.__class__.Compare(self, other) == 0        # pylint: disable=multiple-statements
+    def __ne__(self, other) -> bool: return not isinstance(other, Region) or self.__class__.Compare(self, other) != 0     # pylint: disable=multiple-statements
+    def __lt__(self, other) -> bool: return isinstance(other, Region) and self.__class__.Compare(self, other) < 0         # pylint: disable=multiple-statements
+    def __le__(self, other) -> bool: return isinstance(other, Region) and self.__class__.Compare(self, other) <= 0        # pylint: disable=multiple-statements
+    def __gt__(self, other) -> bool: return isinstance(other, Region) and self.__class__.Compare(self, other) > 0         # pylint: disable=multiple-statements
+    def __ge__(self, other) -> bool: return isinstance(other, Region) and self.__class__.Compare(self, other) >= 0        # pylint: disable=multiple-statements
 
     # ----------------------------------------------------------------------
     def __contains__(

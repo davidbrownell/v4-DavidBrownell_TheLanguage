@@ -3,7 +3,7 @@
 # |  Range.py
 # |
 # |  David Brownell <db@DavidBrownell.com>
-# |      2023-07-31 15:03:21
+# |      2023-11-24 10:45:48
 # |
 # ----------------------------------------------------------------------
 # |
@@ -19,13 +19,13 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Union
 
-from .Location import Location
+from TheLanguage.Common.Location import Location
 
 
 # ----------------------------------------------------------------------
 @dataclass(frozen=True)
 class Range(object):
-    """A Range of Locations"""
+    """A Range of locations within a source file"""
 
     # ----------------------------------------------------------------------
     begin: Location
@@ -57,12 +57,12 @@ class Range(object):
         return 0
 
     # ----------------------------------------------------------------------
-    def __eq__(self, other): return self.__class__.Compare(self, other) == 0    # pylint: disable=multiple-statements
-    def __ne__(self, other): return self.__class__.Compare(self, other) != 0    # pylint: disable=multiple-statements
-    def __lt__(self, other): return self.__class__.Compare(self, other) < 0     # pylint: disable=multiple-statements
-    def __le__(self, other): return self.__class__.Compare(self, other) <= 0    # pylint: disable=multiple-statements
-    def __gt__(self, other): return self.__class__.Compare(self, other) > 0     # pylint: disable=multiple-statements
-    def __ge__(self, other): return self.__class__.Compare(self, other) >= 0    # pylint: disable=multiple-statements
+    def __eq__(self, other) -> bool: return isinstance(other, Range) and self.__class__.Compare(self, other) == 0       # pylint: disable=multiple-statements
+    def __ne__(self, other) -> bool: return not isinstance(other, Range) or self.__class__.Compare(self, other) != 0    # pylint: disable=multiple-statements
+    def __lt__(self, other) -> bool: return isinstance(other, Range) and self.__class__.Compare(self, other) < 0        # pylint: disable=multiple-statements
+    def __le__(self, other) -> bool: return isinstance(other, Range) and self.__class__.Compare(self, other) <= 0       # pylint: disable=multiple-statements
+    def __gt__(self, other) -> bool: return isinstance(other, Range) and self.__class__.Compare(self, other) > 0        # pylint: disable=multiple-statements
+    def __ge__(self, other) -> bool: return isinstance(other, Range) and self.__class__.Compare(self, other) >= 0       # pylint: disable=multiple-statements
 
     # ----------------------------------------------------------------------
     def __contains__(

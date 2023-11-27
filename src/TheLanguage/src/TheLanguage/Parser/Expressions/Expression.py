@@ -3,7 +3,7 @@
 # |  Expression.py
 # |
 # |  David Brownell <db@DavidBrownell.com>
-# |      2023-07-28 08:59:53
+# |      2023-11-26 13:33:07
 # |
 # ----------------------------------------------------------------------
 # |
@@ -13,63 +13,65 @@
 # |  http://www.boost.org/LICENSE_1_0.txt.
 # |
 # ----------------------------------------------------------------------
-"""Contains types associated with expressions"""
+"""Contains the Expression and ExpressionType objects"""
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from contextlib import contextmanager
-from dataclasses import dataclass, field, fields, InitVar, make_dataclass
+from dataclasses import dataclass, fields, InitVar, field
 from enum import auto, Enum
-from pathlib import Path
-from types import NoneType
-from typing import Any, Callable, Generator, Iterable, Iterator, Optional, Type as PythonType, Union
+from typing import Any, Callable, Generator, Iterable, Iterator, Optional, Union
 
 from Common_Foundation.Types import extensionmethod, overridemethod
 
 from TheLanguage.Common.Region import Region
-from TheLanguage.Parser.Visitors.ExpressionVisitor import VisitResult, ExpressionVisitor, ExpressionVisitorHelper
+
+from TheLanguage.Parser.Visitors.ExpressionVisitor import ExpressionVisitor, ExpressionVisitorHelper, VisitResult
 
 
-# ----------------------------------------------------------------------
-# |
-# |  Public Types
-# |
 # ----------------------------------------------------------------------
 class ExpressionType(Enum):
     """Classification of an expression"""
 
-    # The type is not currently known, but will be determined based on the expression containing it.
+    # ----------------------------------------------------------------------
+    # |
+    # |  Public Types
+    # |
+    # ----------------------------------------------------------------------
+    # The type is not currently known but will be determined based on the expression containing it.
     Unknown                                 = auto()
 
     # ----------------------------------------------------------------------
     # |  Compile-time Values
-
     Include                                 = auto()
 
-    # Indicates that the Token is applicable at compile-time, but it isn't clear if this means
-    # Configuration-time or TypeCustomization-time. The eventual type will be resolved by the
-    # expression containing it.
+    # Indicates the the Expression is applied at compile-time, but it isn't clear if this means
+    # Configuration-time of TypeCustomization-time. The eventual type will be determined based on
+    # the expression containing it.
     CompileTimeTemporary                    = auto()
 
-    # The associated Token can be used in the specification of basic compile-time types.
+    # The associated Expression can be used in the specification of basic compile-time types.
     Configuration                           = auto()
 
-    # The associated Token can be used in the evaluation of compile-time constraints.
-    TypeCustomization                       = auto()
+    # The associated Expressions can be used in the evaluation of compile-time constraints.
+    TypeCustomizationTime                   = auto()
 
     # ----------------------------------------------------------------------
     # |  Standard Values
     Standard                                = auto()
 
     # ----------------------------------------------------------------------
-    @classmethod
+    # |
+    # |  Public Methods
+    # |
+    # ----------------------------------------------------------------------
     @classmethod
     def GetDominantType(
         cls,
         *expressions: "Expression",
     ) -> "ExpressionType":
-        """Return the most dominant (highest value) token type."""
+        """Return the most dominant (highest value) expression type"""
 
-        dominant_expression_type: Optional["ExpressionType"] = None
+        dominant_expression_type: Optional[ExpressionType] = None
 
         for expression in expressions:
             this_expression_type = expression.expression_type__
@@ -81,6 +83,22 @@ class ExpressionType(Enum):
             return cls.Unknown
 
         return dominant_expression_type
+
+    # ----------------------------------------------------------------------
+    @staticmethod
+    def Compare(
+        this: "ExpressionType",
+        that: "ExpressionType",
+    ) -> int:
+        return this.value - that.value
+
+    # ----------------------------------------------------------------------
+    def __eq__(self, other) -> bool: return isinstance(other, ExpressionType) and self.__class__.Compare(self, other) == 0        # pylint: disable=multiple-statements
+    def __ne__(self, other) -> bool: return not isinstance(other, ExpressionType) or self.__class__.Compare(self, other) != 0     # pylint: disable=multiple-statements
+    def __lt__(self, other) -> bool: return isinstance(other, ExpressionType) and self.__class__.Compare(self, other) < 0         # pylint: disable=multiple-statements
+    def __le__(self, other) -> bool: return isinstance(other, ExpressionType) and self.__class__.Compare(self, other) <= 0        # pylint: disable=multiple-statements
+    def __gt__(self, other) -> bool: return isinstance(other, ExpressionType) and self.__class__.Compare(self, other) > 0         # pylint: disable=multiple-statements
+    def __ge__(self, other) -> bool: return isinstance(other, ExpressionType) and self.__class__.Compare(self, other) >= 0        # pylint: disable=multiple-statements
 
     # ----------------------------------------------------------------------
     def IsConfiguration(self) -> bool:
@@ -97,34 +115,31 @@ class Expression(ABC):
     """Base class for all expressions encountered during the parsing process."""
 
     # ----------------------------------------------------------------------
+    # |
+    # |  Public Data
+    # |
+    # ----------------------------------------------------------------------
     expression_type__: ExpressionType
     region__: Region
 
-    finalize: InitVar[bool]                             = field(kw_only=True, default=True)
+    finalize: InitVar[bool]                 = field(kw_only=True, default=True)
 
-    parent__: Optional["Expression"]                    = field(init=False)
+    parent__: Optional["Expression"]        = field(init=False)
 
-    _unique_id: Optional[tuple[Any, ...]]               = field(init=False)
-    _disabled: bool                                     = field(init=False)
+    _unique_id: Optional[tuple[Any, ...]]   = field(init=False)
+    _disabled: bool                         = field(init=False)
 
-    _finalize_func: Callable[[], None]                  = field(init=False)
+    _finalize_func: Callable[[], None]      = field(init=False)
 
     # ----------------------------------------------------------------------
     # |
     # |  Public Methods
     # |
     # ----------------------------------------------------------------------
-    @classmethod
-    def Create(cls, *args, **kwargs):
-        # Default creation method that can be overridden by derived classes to create a more
-        # coherent initialization order.
-        return  cls(*args, **kwargs)
-
-    # ----------------------------------------------------------------------
     def __post_init__(
         self,
         finalize: bool,
-    ):
+    ) -> None:
         self.parent__ = None
 
         self._unique_id = None
@@ -153,27 +168,23 @@ class Expression(ABC):
 
     @property
     def is_disabled__(self) -> bool:
-        return self._disabled  # type: ignore  # pylint: disable=no-member
+        return self._disabled
 
     # ----------------------------------------------------------------------
     def Clone(self, **kwargs) -> "Expression":
-        for field in fields(self.__class__):
+        for field_value in fields(self.__class__):
             if (
-                field.init
-                and field.name != "finalize"
-                and field.name not in kwargs
+                field_value.init
+                and field_value.name != "finalize"
+                and field_value.name not in kwargs
             ):
-                kwargs[field.name] = getattr(self, field.name)
+                kwargs[field_value.name] = getattr(self, field_value.name)
 
         return self.__class__(**kwargs)
 
     # ----------------------------------------------------------------------
-    def __eq__(self, other) -> bool:
-        return self.unique_id__ == other.unique_id__
-
-    # ----------------------------------------------------------------------
-    def __ne__(self, other) -> bool:
-        return not self.__eq__(other)
+    def __eq__(self, other) -> bool: return self.unique_id__ == other.unique_id__   # pylint: disable=multiple-statements
+    def __ne__(self, other) -> bool: return self.unique_id__ != other.unique_id__   # pylint: disable=multiple-statements
 
     # ----------------------------------------------------------------------
     def Disable(self) -> None:
@@ -196,7 +207,6 @@ class Expression(ABC):
             # ----------------------------------------------------------------------
             @staticmethod
             @overridemethod
-            @contextmanager
             def OnPhrase(
                 expression: Expression,
             ) -> Iterator[VisitResult]:
@@ -220,9 +230,6 @@ class Expression(ABC):
             return VisitResult.Continue
 
         with visitor.OnExpression(self) as visit_result:
-            if visit_result is None:
-                visit_result = VisitResult.Continue
-
             if visit_result & VisitResult.Terminate:
                 return visit_result
 
@@ -235,9 +242,6 @@ class Expression(ABC):
             assert method is not None, method_name
 
             with method(self) as visit_result:
-                if visit_result is None:
-                    visit_result = VisitResult.Continue
-
                 if visit_result & VisitResult.Terminate:
                     return visit_result
 
@@ -247,9 +251,6 @@ class Expression(ABC):
 
                     if all_details:
                         with visitor.OnExpressionDetails(self) as details_visit_result:
-                            if details_visit_result is None:
-                                details_visit_result = VisitResult.Continue
-
                             if details_visit_result & VisitResult.Terminate:
                                 return details_visit_result
 
@@ -267,34 +268,37 @@ class Expression(ABC):
                                         include_disabled=include_disabled,
                                     )
 
-                                    if detail_accept_result is not None and detail_accept_result & VisitResult.Terminate:
+                                    if detail_accept_result & VisitResult.Terminate:
                                         return detail_accept_result
+
+                                    if detail_accept_result & VisitResult.SkipDetails:
+                                        break
 
                 # Children
                 if not visit_result & VisitResult.SkipChildren:
-                    accept_children_result = self._GetAcceptChildren()
+                    children_result = self._GetAcceptChildren()
 
-                    if accept_children_result:
-                        children_name, all_children = accept_children_result
+                    if children_result:
+                        children_name, children = children_result
 
-                        with visitor.OnExpressionChildren(self, children_name, all_children) as children_visit_result:
-                            if children_visit_result is None:
-                                children_visit_result = VisitResult.Continue
-
+                        with visitor.OnExpressionChildren(self, children_name, children) as children_visit_result:
                             if children_visit_result & VisitResult.Terminate:
                                 return children_visit_result
 
                             if not children_visit_result & VisitResult.SkipChildren:
-                                for child in all_children:
+                                for child in children:
                                     child_accept_result = child.Accept(
                                         visitor,
                                         include_disabled=include_disabled,
                                     )
 
-                                    if child_accept_result is not None and child_accept_result & VisitResult.Terminate:
+                                    if child_accept_result & VisitResult.Terminate:
                                         return child_accept_result
 
-                return VisitResult.Continue
+                                    if child_accept_result & VisitResult.SkipChildren:
+                                        break
+
+        return VisitResult.Continue
 
     # ----------------------------------------------------------------------
     # |
@@ -307,7 +311,7 @@ class Expression(ABC):
         None,
     ]
 
-    _GenerateChildrenResultType             = Optional[tuple[str, Iterable["Expression"]]]
+    _GetAcceptChildrenResultType            = Optional[tuple[str, Iterable["Expression"]]]
 
     # ----------------------------------------------------------------------
     # |
@@ -315,28 +319,27 @@ class Expression(ABC):
     # |
     # ----------------------------------------------------------------------
     def _Finalize(self) -> None:
-        self._finalize_func()  # type: ignore  # pylint: disable=no-member
+        self._finalize_func()
 
     # ----------------------------------------------------------------------
     # |
     # |  Private Methods
     # |
     # ----------------------------------------------------------------------
-    @classmethod
     @extensionmethod
-    def _GetUniqueId(cls) -> tuple[Any, ...]:
-        raise Exception("This functionality should be implemented by derived classes when applicable ({}).".format(cls))
+    def _GetUniqueId(self) -> tuple[Any, ...]:
+        raise Exception("This functionality should be implemented by derived classes when applicable ({}).".format(self.__class__))
 
     # ----------------------------------------------------------------------
     @extensionmethod
     def _GenerateAcceptDetails(self) -> "Expression._GenerateAcceptDetailsResultType":
         # Nothing by default
-        if False:
+        if False:  # pylint: disable=using-constant-test
             yield
 
     # ----------------------------------------------------------------------
     @extensionmethod
-    def _GetAcceptChildren(self) -> "Expression._GenerateChildrenResultType":
+    def _GetAcceptChildren(self) -> "Expression._GetAcceptChildrenResultType":
         # Nothing by default
         return None
 
@@ -350,7 +353,7 @@ class _UniqueIdVisitor(ExpressionVisitorHelper):
         self,
         expression: Expression,
     ):
-        self._target_expression             = expression
+        self._target_expression                         = expression
 
         self._child_unique_ids: list[tuple[Any, ...]]   = []
         self._result: Optional[tuple[Any, ...]]         = None
@@ -386,5 +389,5 @@ class _UniqueIdVisitor(ExpressionVisitorHelper):
         self._child_unique_ids.append(expression.unique_id__)
 
         # Do not parse the children of this expression as its unique id already takes that
-        # information into account (we still need to parse the details).
+        # information into account (however we still need to parse the details).
         yield VisitResult.SkipChildren

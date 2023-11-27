@@ -3,7 +3,7 @@
 # |  Errors.py
 # |
 # |  David Brownell <db@DavidBrownell.com>
-# |      2023-08-02 12:50:53
+# |      2023-11-24 11:24:30
 # |
 # ----------------------------------------------------------------------
 # |
@@ -31,19 +31,20 @@ from Common_Foundation import TextwrapEx
 from TheLanguage.Common.Region import Location, Region
 
 
+
 # ----------------------------------------------------------------------
 # |
 # |  Public Types
 # |
 # ----------------------------------------------------------------------
-@dataclass(frozen=True, repr=False)
+@dataclass(frozen=True)
 class Error(object):
     """Base class for all errors generated within TheLanguage"""
 
     # ----------------------------------------------------------------------
     message: str
 
-    regions_or_regions: InitVar[Region | list[Region]]
+    region_or_regions: InitVar[Region | list[Region]]
     regions: list[Region]                   = field(init=False)
 
     # ----------------------------------------------------------------------
@@ -73,27 +74,26 @@ class Error(object):
     # ----------------------------------------------------------------------
     def __str__(self) -> str:
         if len(self.regions) == 1 and "\n" not in self.message:
-            message = "{} ({})".format(self.message, self.regions[0])
-        else:
-            message = textwrap.dedent(
-                """\
-                {}
+            return "{} ({})".format(self.message, self.regions[0])
 
-                {}
-                """,
-            ).format(
-                self.message.rstrip(),
-                "\n".join("    - {}".format(region) for region in self.regions),
-            )
+        return textwrap.dedent(
+            """\
+            {}
 
-        return message
+            {}
+            """,
+        ).format(
+            self.message.rstrip(),
+            "\n".join("    - {}".format(region) for region in self.regions),
+        )
 
 
 # ----------------------------------------------------------------------
-@dataclass(frozen=True, repr=False)
+@dataclass(frozen=True)
 class ExceptionError(Error):
-    """Error based on a python Exception."""
+    """Errors based on a python Exception"""
 
+    # ----------------------------------------------------------------------
     ex: Exception
 
     # ----------------------------------------------------------------------
@@ -112,11 +112,11 @@ class ExceptionError(Error):
             sink = StringIO()
 
             traceback.print_exception(ex, file=sink)
-            sink = sink.getvalue()
+            sink_str = sink.getvalue()
 
             regex = re.compile(r"^\s*File \"(?P<filename>.+?)\", line (?P<line>\d+),.+$", re.MULTILINE)
 
-            for line in sink.splitlines():
+            for line in sink_str.splitlines():
                 match = regex.match(line)
                 if not match:
                     continue
@@ -152,7 +152,7 @@ class ExceptionError(Error):
 # ----------------------------------------------------------------------
 @dataclass(frozen=True)
 class TheLanguageException(Exception):
-    """Exception raises by functionality in TheLanguage."""
+    """Exception raised by functionality in TheLanguage"""
 
     # ----------------------------------------------------------------------
     error: InitVar[Error]
@@ -182,14 +182,11 @@ def CreateErrorType(
         args.items(),
         bases=(Error, ),
         frozen=True,
-        repr=False,
     )
 
     # ----------------------------------------------------------------------
-    @dataclass(frozen=True, repr=False)
+    @dataclass(frozen=True)
     class NewError(dynamic_fields_class):  # type: ignore
-        # pylint: disable=missing-docstring
-
         # ----------------------------------------------------------------------
         message: str                        = field(init=False)
 
@@ -239,7 +236,7 @@ def _(
 def _(
     value: list,
 ) -> str:
-    return ", ".join("'{}'".format(_ArgToString(item)) for item in value)
+    return ", ".join("'{}'".format(_ArgToString(v)) for v in value)
 
 
 # ----------------------------------------------------------------------

@@ -30,7 +30,6 @@ from Common_Foundation.Streams.DoneManager import DoneManager
 
 from Common_FoundationEx import ExecuteTasks
 
-# pylint: disable=import-error
 from TheLanguage import AllErrors
 
 from TheLanguage.Common.Errors import Error, ExceptionError, TheLanguageException

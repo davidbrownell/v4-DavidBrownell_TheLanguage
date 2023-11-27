@@ -35,7 +35,7 @@ from TheLanguage.Common.Region import Location, Region
 
 from TheLanguage.Parser.Expressions.Expression import Expression
 from TheLanguage.Parser.Expressions.IdentifierExpression import IdentifierExpression
-from TheLanguage.Parser.Expressions.LeafExpression import LeafExpression
+from TheLanguage.Parser.Expressions.TerminalExpression import TerminalExpression
 from TheLanguage.Parser.Expressions.RootExpression import RootExpression
 
 from TheLanguage.Parser.Impl.ParseIncludeExpression import ParseIncludeExpression
@@ -58,7 +58,7 @@ class AntlrVisitorMixin(object):
     # ----------------------------------------------------------------------
     @dataclass(frozen=True)
     class CreateIncludeExpressionsSourceInfo(object):
-        filename_or_directory: LeafExpression[Path]
+        filename_or_directory: TerminalExpression[Path]
 
         traverse_from_root: bool            = field(kw_only=True, default=False)  # True if source begins with slash
         force_directory: bool               = field(kw_only=True, default=False)  # True if source ends with slash
@@ -115,7 +115,7 @@ class AntlrVisitorMixin(object):
         else:
             region = self._stack[0].region__
 
-        return RootExpression.Create(region, self._stack)
+        return RootExpression(region, self._stack)
 
     # ----------------------------------------------------------------------
     def CreateRegion(

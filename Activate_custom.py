@@ -17,8 +17,9 @@
 # pylint: disable=missing-module-docstring
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
+from Common_Foundation import PathEx                                        # type: ignore  # pylint: disable=import-error,unused-import
 from Common_Foundation.Shell import Commands                                # type: ignore  # pylint: disable=import-error,unused-import
 from Common_Foundation.Shell.All import CurrentShell                        # type: ignore  # pylint: disable=import-error,unused-import
 from Common_Foundation.Streams.DoneManager import DoneManager               # type: ignore  # pylint: disable=import-error,unused-import
@@ -32,14 +33,18 @@ from RepositoryBootstrap import DataTypes                                   # ty
 def GetCustomActions(                                                       # pylint: disable=too-many-arguments
     # Note that it is safe to remove any parameters that are not used
     dm: DoneManager,                                                        # pylint: disable=unused-argument
-    repositories: List[DataTypes.ConfiguredRepoDataWithPath],               # pylint: disable=unused-argument
+    repositories: list[DataTypes.ConfiguredRepoDataWithPath],               # pylint: disable=unused-argument
     generated_dir: Path,                                                    # pylint: disable=unused-argument
     configuration: Optional[str],                                           # pylint: disable=unused-argument
     version_specs: Configuration.VersionSpecs,                              # pylint: disable=unused-argument
     force: bool,                                                            # pylint: disable=unused-argument
     is_mixin_repo: bool,                                                    # pylint: disable=unused-argument
-) -> List[Commands.Command]:
+) -> list[Commands.Command]:
     """Returns a list of actions that should be invoked as part of the activation process."""
 
-    # pylint: disable=unreachable
-    return []
+    return [
+        Commands.Augment(
+            "PYTHONPATH",
+            str(PathEx.EnsureDir(Path(__file__).parent / "src" / "TheLanguage" / "src")),
+        ),
+    ]

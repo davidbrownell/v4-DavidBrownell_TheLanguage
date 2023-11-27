@@ -111,7 +111,7 @@ class BuildInfo(BuildInfoBase):
 
             command_line = 'java -jar antlr-4.13.0-complete.jar -Dlanguage=Python3 -o "{output_dir}" -no-listener -visitor "{input_file}"'.format(
                 output_dir=output_dir,
-                input_file=PathEx.EnsureFile(Path(__file__).parent.parent / "Grammar" / "TheLanguageGrammar.g4"),
+                input_file=PathEx.EnsureFile(Path(__file__).parent.parent / "TheLanguageGrammar.g4"),
             )
 
             dm.WriteVerbose("Command Line: {}\n\n".format(command_line))

@@ -3,7 +3,7 @@
 # |  ExpressionVisitor.py
 # |
 # |  David Brownell <db@DavidBrownell.com>
-# |      2023-08-01 09:44:37
+# |      2023-11-26 13:56:11
 # |
 # ----------------------------------------------------------------------
 # |
@@ -20,7 +20,7 @@ import types
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from enum import auto, Flag
-from typing import Iterable, Iterator, Union, TYPE_CHECKING
+from typing import Iterable, Iterator, TYPE_CHECKING, Union
 
 from Common_Foundation.Types import overridemethod
 
@@ -30,8 +30,9 @@ if TYPE_CHECKING:
 
 # ----------------------------------------------------------------------
 class VisitResult(Flag):
-    """Result returned during visitation that controls the visitation of other Expressions."""
+    """Result returned during visitation that control the visitation of other Expressions."""
 
+    # ----------------------------------------------------------------------
     Continue                                = 0
 
     SkipDetails                             = auto()
@@ -86,7 +87,7 @@ class ExpressionVisitor(ABC):
 
 # ----------------------------------------------------------------------
 class ExpressionVisitorHelper(ExpressionVisitor):
-    """Base class that can be used to make writing custom visitors easier."""
+    """Base class that can be used to make writing custom visitors easier by providing default behavior for visitation methods."""
 
     # ----------------------------------------------------------------------
     @overridemethod

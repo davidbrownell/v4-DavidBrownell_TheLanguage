@@ -29,7 +29,7 @@ from Common_Foundation.Types import overridemethod
 from TheLanguage.Parser.ANTLR.Impl.AntlrVisitorMixin import AntlrVisitorMixin
 from TheLanguage.Parser.Expressions.Expression import ExpressionType
 from TheLanguage.Parser.Expressions.IdentifierExpression import IdentifierExpression
-from TheLanguage.Parser.Expressions.LeafExpression import LeafExpression
+from TheLanguage.Parser.Expressions.TerminalExpression import TerminalExpression
 
 # ----------------------------------------------------------------------
 sys.path.insert(0, str(PathEx.EnsureDir(Path(__file__).parent.parent / "GeneratedCode")))
@@ -66,7 +66,7 @@ class AntlrVisitor(TheLanguageGrammarVisitor):
         else:
             source_expression = None
 
-        if len(children) == 1 and isinstance(children[0], LeafExpression):
+        if len(children) == 1 and isinstance(children[0], TerminalExpression):
             assert children[0].value == "*", children
 
             include_items = children[0].region__
@@ -121,7 +121,7 @@ class AntlrVisitor(TheLanguageGrammarVisitor):
 
         self._stack.append(
             AntlrVisitorMixin.CreateIncludeExpressionsSourceInfo(
-                LeafExpression[Path](
+                TerminalExpression[Path](
                     ExpressionType.Unknown, # BugBug
                     self.CreateRegion(ctx),
                     filename_or_directory,
@@ -141,7 +141,7 @@ class AntlrVisitor(TheLanguageGrammarVisitor):
     @overridemethod
     def visitInclude_expression_star(self, ctx:TheLanguageGrammarParser.Include_expression_starContext):
         self._stack.append(
-            LeafExpression[str](
+            TerminalExpression[str](
                 ExpressionType.Unknown, # BugBug: Use of Unknown Expression type
                 self.CreateRegion(ctx),
                 "*",

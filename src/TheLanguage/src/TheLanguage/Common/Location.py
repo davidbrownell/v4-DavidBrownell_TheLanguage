@@ -3,7 +3,7 @@
 # |  Location.py
 # |
 # |  David Brownell <db@DavidBrownell.com>
-# |      2023-07-26 11:29:50
+# |      2023-11-24 10:32:25
 # |
 # ----------------------------------------------------------------------
 # |
@@ -56,12 +56,12 @@ class Location(object):
         return 0
 
     # ----------------------------------------------------------------------
-    def __eq__(self, other): return self.__class__.Compare(self, other) == 0    # pylint: disable=multiple-statements
-    def __ne__(self, other): return self.__class__.Compare(self, other) != 0    # pylint: disable=multiple-statements
-    def __lt__(self, other): return self.__class__.Compare(self, other) < 0     # pylint: disable=multiple-statements
-    def __le__(self, other): return self.__class__.Compare(self, other) <= 0    # pylint: disable=multiple-statements
-    def __gt__(self, other): return self.__class__.Compare(self, other) > 0     # pylint: disable=multiple-statements
-    def __ge__(self, other): return self.__class__.Compare(self, other) >= 0    # pylint: disable=multiple-statements
+    def __eq__(self, other) -> bool: return isinstance(other, Location) and self.__class__.Compare(self, other) == 0        # pylint: disable=multiple-statements
+    def __ne__(self, other) -> bool: return not isinstance(other, Location) or self.__class__.Compare(self, other) != 0     # pylint: disable=multiple-statements
+    def __lt__(self, other) -> bool: return isinstance(other, Location) and self.__class__.Compare(self, other) < 0         # pylint: disable=multiple-statements
+    def __le__(self, other) -> bool: return isinstance(other, Location) and self.__class__.Compare(self, other) <= 0        # pylint: disable=multiple-statements
+    def __gt__(self, other) -> bool: return isinstance(other, Location) and self.__class__.Compare(self, other) > 0         # pylint: disable=multiple-statements
+    def __ge__(self, other) -> bool: return isinstance(other, Location) and self.__class__.Compare(self, other) >= 0        # pylint: disable=multiple-statements
 
     # ----------------------------------------------------------------------
     # ----------------------------------------------------------------------

@@ -3,7 +3,7 @@
 # |  RootExpression.py
 # |
 # |  David Brownell <db@DavidBrownell.com>
-# |      2023-08-01 15:22:43
+# |      2023-11-26 14:28:18
 # |
 # ----------------------------------------------------------------------
 # |
@@ -29,7 +29,7 @@ class RootExpression(Expression):
     """Root of all Expressions"""
 
     # ----------------------------------------------------------------------
-    expression_type__: ClassVar[ExpressionType]         = ExpressionType.Unknown # BugBug
+    expression_type__: ClassVar[ExpressionType]         = ExpressionType.Unknown
 
     children: list[Expression]
 
@@ -45,5 +45,5 @@ class RootExpression(Expression):
 
     # ----------------------------------------------------------------------
     @overridemethod
-    def _GetAcceptChildren(self) -> Expression._GenerateChildrenResultType:
+    def _GetAcceptChildren(self) -> Expression._GetAcceptChildrenResultType:
         return "children", self.children
