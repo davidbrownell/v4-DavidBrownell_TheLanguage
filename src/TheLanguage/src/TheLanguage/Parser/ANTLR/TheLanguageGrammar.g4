@@ -99,31 +99,49 @@ identifier:                                 IDENTIFIER;
 // ----------------------------------------------------------------------
 // |  Expressions
 expression__:                               (
-    include_expression
+    import_expression
 );
 
-// BugBug // Import variations:
-// BugBug //
-// BugBug //   Module Imports:
-// BugBug //     import (<filenamme>[ as <alias>])+
-// BugBug //     from [/]<dir>[/<subdirs][/] import (<filename>[as <alias>])+
-// BugBug //     from [/]<dir>[/<subdirs>][/] import *
-// BugBug //
-// BugBug //   Component Imports:
-// BugBug //     from [[/]<dir>[/<subdirs>]/]<filename> import (<component>[as <alias>])+
-// BugBug //     from [[/]<dir>[/<subdirs>]/]<filename> import *
-// BugBug
-include_expression:                         (INCLUDE_FROM include_expression_source)? INCLUDE_IMPORT (include_expression_star | include_expression_grouped_items__ | include_expression_items__) NEWLINE+;
-
-include_expression_source:                  (
-                                                '.'
-                                                | (('./' | '/')? include_expression_source__ ('/' include_expression_source__)* '/'?)
+// Import variations:
+//
+// import *                                                                 # All files that are siblings of the current file
+// import <filename stems>
+// import <filename stem>
+// from . import *                                                          # All files that are siblings of the current file
+// from . import <filename stems>
+// from . import <filename stem>
+// from <relative path to dir>/ import *                                    # All files within the specified directory
+// from <relative path to dir>/ import <filename stems>
+// from <relative path to dir>/ import <filename stem>
+// from <relative path to file> import *                                    # All public exports in the specified file
+// from <relative path to file> import <components>
+// from <relative path to file> import <component>
+// from /<WorkspaceName>[/<relative path to dir>]/ import *                 # All files within the specified directory
+// from /<WorkspaceName>[/<relative path to dir>]/ import <filename stems>
+// from /<WorkspaceName>[/<relative path to dir>]/ import <filename stem>
+// from /<WorkspaceName>[/<relative path to file] import *                  # All public exports in the specified file
+// from /<WorkspaceName>[/<relative path to file] import <components>
+// from /<WorkspaceName>[/<relative path to file] import <component>
+//
+import_expression:                          (
+                                                (INCLUDE_FROM import_expression_from__)?
+                                                INCLUDE_IMPORT import_expression_import__
+                                                NEWLINE+
                                             );
 
-include_expression_source__:                identifier | include_expression_source_parent_dir;
-include_expression_source_parent_dir:       '..';
+import_expression_from__:                   (
+                                                import_expression_from_workspace_slash?
+                                                import_expression_from_component
+                                                ('/' import_expression_from_component)*
+                                                import_expression_from_directory_slash?
+                                            );
 
-include_expression_star:                    '*';
-include_expression_items__:                 include_expression_element (',' include_expression_element)* ','?;
-include_expression_grouped_items__:         LPAREN include_expression_items__ RPAREN;
-include_expression_element:                 identifier ('as' identifier)?;
+import_expression_from_workspace_slash:     '/';
+import_expression_from_component:           '.' | '..' | identifier;
+import_expression_from_directory_slash:     '/';
+
+import_expression_import__:                 import_expression_import_star | import_expression_import_grouped_items__ | import_expression_import_items__;
+import_expression_import_star:              '*';
+import_expression_import_grouped_items__:   LPAREN import_expression_import_items__ RPAREN;
+import_expression_import_items__:           import_expression_import_element (',' import_expression_import_element)* ','?;
+import_expression_import_element:           identifier ('as' identifier)?;

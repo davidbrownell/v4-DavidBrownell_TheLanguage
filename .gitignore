@@ -29,3 +29,4 @@ test_localsystem.txt
 # ----------------------------------------------------------------------
 .pylintrc
 /.github/workflows/*.jinja2Compiler.ConditionalInvocationQueryMixin.data
+src/TheLanguage/src/TheLanguage/Parser/ANTLR/.antlr

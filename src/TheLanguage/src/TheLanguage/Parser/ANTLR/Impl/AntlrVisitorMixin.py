@@ -29,8 +29,6 @@ from Common_Foundation import PathEx
 
 from TheLanguage import AllErrors
 
-from TheLanguage.Common.Errors import TheLanguageException
-from TheLanguage.Common.Range import Location, Range
 from TheLanguage.Common.Region import Location, Region
 
 from TheLanguage.Parser.Expressions.Expression import Expression
@@ -57,27 +55,33 @@ class AntlrVisitorMixin(object):
     # |
     # ----------------------------------------------------------------------
     @dataclass(frozen=True)
-    class CreateIncludeExpressionsSourceInfo(object):
+    class CreateIncludeExpressionsFromInfo(object):
+        """Information associated with the 'from'-part of the include expression"""
+
+        # ----------------------------------------------------------------------
         filename_or_directory: TerminalExpression[Path]
 
-        traverse_from_root: bool            = field(kw_only=True, default=False)  # True if source begins with slash
-        force_directory: bool               = field(kw_only=True, default=False)  # True if source ends with slash
-        is_relative: bool                   = field(kw_only=True, default=False)  # True if source contains ".." or "."
+        traverse_from_root: Optional[Region]            = field(kw_only=True, default=None)  # True if source begins with slash
+        is_directory: Optional[Region]                  = field(kw_only=True, default=None)  # True if source ends with slash
+        is_relative: Optional[Region]                   = field(kw_only=True, default=None)  # True if source contains ".." or "."
 
     # ----------------------------------------------------------------------
     @dataclass(frozen=True)
     class CreateIncludeExpressionsIncludeItem(object):
+        """Information about an item associated with the 'include'-part of the include expression"""
+
+        # ----------------------------------------------------------------------
         region: Region
 
         element_name: IdentifierExpression
         reference_name: IdentifierExpression
 
     # ----------------------------------------------------------------------
-    class CreateIncludeExpressionsFuncType(Protocol):
+    class CreateIncludeExpressionsFuncType(Protocol):  # pylint: disable=missing-class-docstring
         def __call__(
             self,
             include_expression_region: Region,
-            source: Optional["AntlrVisitorMixin.CreateIncludeExpressionsSourceInfo"],
+            from_info: Optional["AntlrVisitorMixin.CreateIncludeExpressionsFromInfo"],
             include_items: (
                 Region                                                              # The item was '*'
                 | list["AntlrVisitorMixin.CreateIncludeExpressionsIncludeItem"]     # Items explicitly included
@@ -113,7 +117,11 @@ class AntlrVisitorMixin(object):
         if not self._stack:
             region = Region(Location(1, 1), Location(1, 1), self.filename)
         else:
-            region = self._stack[0].region__
+            region = Region(
+                self._stack[0].region__.begin,
+                self._stack[-1].region__.end,
+                self.filename,
+            )
 
         return RootExpression(region, self._stack)
 
@@ -121,7 +129,7 @@ class AntlrVisitorMixin(object):
     def CreateRegion(
         self,
         ctx: antlr4.ParserRuleContext,
-    ) -> Range:
+    ) -> Region:
         assert isinstance(ctx.start, antlr4.Token), ctx.start
         assert isinstance(ctx.stop, antlr4.Token), ctx.stop
 
@@ -184,7 +192,7 @@ class AntlrVisitorMixin(object):
         if value.endswith("?") or value.endswith("!"):
             return False
 
-        if 'a' <= value.lstrip("_")[0] <= 'z':
+        if not 'A' <= value.lstrip("_")[0] <= 'Z':
             return False
 
         return True
@@ -202,22 +210,10 @@ class AntlrVisitorMixin(object):
         if value.endswith("?") or value.endswith("!"):
             return False
 
-        if 'a' <= value[0] <= 'z':
+        if not 'A' <= value[0] <= 'Z':
             return False
 
         return True
-
-    # ----------------------------------------------------------------------
-    @classmethod
-    def IsValidComponent(
-        cls,
-        identifier: IdentifierExpression,
-    ) -> bool:
-        return (
-            cls.IsValidClass(identifier)
-            or cls.IsValidFunction(identifier)
-            or cls.IsValidType(identifier)
-        )
 
     # ----------------------------------------------------------------------
     @staticmethod
@@ -229,7 +225,7 @@ class AntlrVisitorMixin(object):
         if value.startswith("__") and not value.endswith("__"):
             return False
 
-        if 'a' <= value.lstrip("_")[0] <= 'z':
+        if not 'A' <= value.lstrip("_")[0] <= 'Z':
             return False
 
         return True
@@ -247,7 +243,7 @@ class AntlrVisitorMixin(object):
         if value.endswith("?") or value.endswith("!"):
             return False
 
-        if 'a' <= value[0] <= 'z':
+        if not 'A' <= value[0] <= 'Z':
             return False
 
         if value[-1] != 'T':
@@ -268,6 +264,18 @@ class AntlrVisitorMixin(object):
         identifier: IdentifierExpression,
     ) -> bool:
         return True # BugBug
+
+    # ----------------------------------------------------------------------
+    @classmethod
+    def IsValidComponent(
+        cls,
+        identifier: IdentifierExpression,
+    ) -> bool:
+        return (
+            cls.IsValidClass(identifier)
+            or cls.IsValidFunction(identifier)
+            or cls.IsValidType(identifier)
+        )
 
     # ----------------------------------------------------------------------
     @classmethod
